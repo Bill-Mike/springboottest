@@ -1,2 +1,18 @@
 server:
-  port: 8081
+  port: 8080
+spring:
+  profiles:
+    active: dev
+---
+server:
+  port: 8082
+spring:
+  profiles: dev
+logging:
+  config: classpath:logback.xml
+  path: /log/spring-boot.log
+---
+server:
+  port: 8082
+spring:
+  profiles: prod

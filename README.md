@@ -33,7 +33,7 @@ server:
 </server>
 ```
 
-### YAML语法：
+#### YAML语法：
 
 #### 基本语法：
 
@@ -249,5 +249,160 @@ public class MyAppConfig {
 
 ```
 
+```
+
+#### Profile
+
+###### 1多profile模式
+
+我们在主配置文件编写的时候，文件名可以是application-{profile}.properties/yml
+
+默认使用appliance.properties
+
+application.properties
+
+```properties
+server.port=8081
+spring.profiles.active=dev
+
+person.lastName=王五
+person.age=20
+person.boos=false
+person.birthday=2019/11/19
+person.maps.k1=v1
+person.maps.k2=v2
+person.lists=cat,dog,pig
+person.dog.lastName=旺财
+person.dog.age=2
+```
+
+applicaiton-dev.properties
+
+```properties
+server.port=8082
+person.lastName=王五
+person.age=20
+person.boos=false
+person.birthday=2019/11/19
+person.maps.k1=v1
+person.maps.k2=v2
+person.lists=cat,dog,pig
+person.dog.lastName=旺财
+person.dog.age=2
+```
+
+applicaiton-prod.properties
+
+```properties
+server.port=8080
+person.lastName=王五
+person.age=20
+person.boos=false
+person.birthday=2019/11/19
+person.maps.k1=v1
+person.maps.k2=v2
+person.lists=cat,dog,pig
+person.dog.lastName=旺财
+person.dog.age=2
+```
+
+
+
+###### 2yml支持多文档块模式
+
+application.yml中使用spring.profiles.active激活制定模块（以“---”的形式分割文档块）
+
+```
+server:
+  port: 8081
+spring:
+  profiles:
+    active: dev
+---
+server:
+  port: 8080
+spring:
+  profiles: dev
+---
+server:
+  port: 8082
+spring:
+  profiles: prod
+```
+
+
+
+###### 3激活制定profile
+
+1.在配置文件application.properties中添加
+
+```
+spring.profiles.active=dev #dev表示application-dev.properties文件
+```
+
+2命令行
+
+--spring.profiles.active=dev制定激活环境
+
+![image-20191120093642759](C:\Users\test\AppData\Roaming\Typora\typora-user-images\image-20191120093642759.png)
+
+![image-20191120093725767](C:\Users\test\AppData\Roaming\Typora\typora-user-images\image-20191120093725767.png)
+
+或打成jar包后：
+
+java -jar springboottest.jar --spring.profiles.active=dev
+
+#### 配置文件的加载位置
+
+springboot启动后会自动扫描application.properties或者application.yml文件作为springboot的默认文件
+
+file./config/
+
+file./
+
+classpath:/config/
+
+classpath:./
+
+优先级从上到下一次递减，全部加载或，形成**互补配置**
+
+我们还可以通过spring.config.location来修改配置文件位置
+
+项目打包好以后，我们还可以通过命令行的形式里指定配置文件的位置，新的配置文件和原来的配置文件一起形成互补配置。
+
+#### 外部配置的加载顺序
+
+1.命令行
+
+2.来自java:com/env的ONI属性
+
+3.java系统属性（System.getProperties()）
+
+4.操作系统环境变量
+
+5.RandomValuePropertieSource配置的random.*属性值
+
+6.jar包外部的application-{profiles}.properties/yml
+
+7.jar包内部的application-{profiles}.properties/yml
+
+8.@Configuration注解类上的@PropertiesSource
+
+9.通过SpringApplication.setDefaultProperties指定的默认属性
+
+#### 自动配置原理
+
+1.springboot启动的时候加载主配置类，开启了自动配置功能，@EnableAutoConfiguration
+
+2.@EnableAutoConfiguration作用：
+
+​	利用AutoConfigurationImportSelector给容器导入一些组件
+
+可以看插件selectImports()方法返回的内容
+
+```jva
+AutoConfigurationMetadata autoConfigurationMetadata = AutoConfigurationMetadataLoader.loadMetadata(this.beanClassLoader);
+            AutoConfigurationImportSelector.AutoConfigurationEntry autoConfigurationEntry = this.getAutoConfigurationEntry(autoConfigurationMetadata, annotationMetadata);
+            return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
 ```
 
